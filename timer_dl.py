@@ -9,15 +9,11 @@ sec = {}
 
 tick = 1.0/30.0
 
-# カメラから画像を取得して,リアルタイムに手書き数字を判別させる。
-# 動画表示
-
 engines = pyocr.get_available_tools()
 engine = engines[0]
 
-cap = cv2.VideoCapture('data/ex1.mp4')
-
-# model = load_model("MNIST.h5") # 学習済みモデルをロード
+# ストリーム処理にして，録画しながら計測したい．
+cap = cv2.VideoCapture('data/yamada2.mov')
 
 # 無限ループ
 while(True):
@@ -30,7 +26,8 @@ while(True):
     # 画像のサイズを取得,表示。グレースケールの場合,shape[:2]
     h, w, _ = frame.shape[:3]
 
-    # ページ番号をフォーカス
+    # ページ番号をフォーカス 
+    # 要：自動化
     w_center = (w//100)*93
     h_center = (h//1000)*999
 
