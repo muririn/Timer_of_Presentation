@@ -1,4 +1,3 @@
-
 import cv2
 import pyocr
 from PIL import Image
@@ -27,7 +26,9 @@ while(True):
     # 画像のサイズを取得,表示。グレースケールの場合,shape[:2]
     h, w, _ = frame.shape[:3]
 
-    # ページ番号をフォーカス
+    # ページ番号をフォーカス 
+    # 要：自動化
+
     w_center = (w//100)*93
     h_center = (h//1000)*999
 
