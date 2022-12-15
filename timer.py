@@ -1,20 +1,69 @@
-import cv2
-import numpy as np
-import pytesseract
 
-cap = cv2.VideoCapture('/Users/nishimurakai/lab/Presentation_timer/data/ex.mov')
- 
-# ret, frame = cap.read()
-# cv2.imwrite('first_frame.png',frame)
- 
-while True:
-    
-    ret, frame = cap.read()
-    if ret:
-        number = pytesseract.image_to_string(frame)
-        print(number)
-    else:
+import cv2
+import pyocr
+from PIL import Image
+import sys
+
+argv = sys.args
+
+sec = {}
+
+# 動画が30fpsの場合
+tick = 1.0/30.0
+
+engines = pyocr.get_available_tools()
+engine = engines[0]
+
+cap = cv2.VideoCapture(argv[1])
+
+# 無限ループ
+while(True):
+
+    ret, frame = cap.read()    
+
+    if not ret: # 終了処理
         break
- 
-cap.release()
-cv2.destroyAllWindows()
+
+    # 画像のサイズを取得,表示。グレースケールの場合,shape[:2]
+    h, w, _ = frame.shape[:3]
+
+    # ページ番号をフォーカス
+    w_center = (w//100)*93
+    h_center = (h//1000)*999
+
+    # # カメラ画像の整形
+    im = frame[h_center:h_center+60, w_center-30:w_center+30] # トリミング
+
+    # 判定結果を上位3番目まで表示させる 
+
+    cv2.imwrite('checkpt.png', im)
+    
+    num = engine.image_to_string(Image.open('checkpt.png'), lang='eng', builder=pyocr.builders.DigitBuilder(tesseract_layout=6))
+    
+    print(num) # 「Test Message」が出力される
+
+    if num.isdecimal():
+        p_num = int(num)
+    else:
+        p_num = -1
+
+    if p_num == -1:
+        continue
+    elif p_num in sec:
+        sec[p_num] += tick
+    else:
+        sec[p_num] = tick
+
+sec = sorted(sec.items())
+sec = dict((x, y) for x, y in sec)
+
+print(sec)
+
+sum = 0.0
+for i in sec.values():
+    sum += i
+
+print(sum)
+
+cap.release() # カメラを解放
+cv2.destroyAllWindows() # ウィンドウを消す
